@@ -9,6 +9,11 @@ public class Piece {
 		this.color = color;
 	}
 
+	public Piece() {
+		this.position = new Position(0, 0);
+		this.color = Color.NONE;
+	}
+
 	public Position getPosition() {
 		return position;
 	}
