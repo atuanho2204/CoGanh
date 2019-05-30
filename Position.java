@@ -15,4 +15,7 @@ public class Position {
 		return y;
 	}
 
+	public boolean isValid() {
+		return (0 <= x && x < 5 && 0 <= y && y < 5);
+	}
 }
