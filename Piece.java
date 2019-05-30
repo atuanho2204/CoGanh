@@ -1,8 +1,10 @@
 public class Piece {
 	private Position position;
-	private String color;
 
-	public Piece(Position position, String color) {
+	public enum Color {WHITE, BLACK, NONE}
+	private Color color;
+
+	public Piece(Position position, Color color) {
 		this.position = position;
 		this.color = color;
 	}
@@ -15,4 +17,24 @@ public class Piece {
 		return color;
 	}
 
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
+	public void setPosition(Position position) {
+		this.position = position;
+	}
+
+	public String toString() {
+		switch(color) {
+			case WHITE:
+				return "W";
+
+			case BLACK:
+				return "B";
+
+			default:
+				return ".";
+		}
+	}
 }
