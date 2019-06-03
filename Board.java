@@ -57,9 +57,10 @@ public class Board {
 
 	// return false if invalid, true if valid
 	public boolean makeMove(Move move) {
+		System.out.println("Hello");
 		if (!move.isValid()) return false;
 		// change the board
-			swap(move.getOldPosition().getX(), move.getOldPosition().getY(), move.getNewPosition().getX(), move.getNewPosition().getY() );
+		swap(move.getOldPosition().getX(), move.getOldPosition().getY(), move.getNewPosition().getX(), move.getNewPosition().getY() );
 		return true;
 
 

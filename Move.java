@@ -20,16 +20,19 @@ public class Move {
 	public boolean isValid() {
 		// false if invalid positions
 		if (!oldPos.isValid() || !newPos.isValid()) {
+			// System.out.println("isValidksdfisj is invalid");
 			return false;
 		}
 
 		// false if newPos already has a piece
 		if (board.getPiece(newPos).getColor() != Piece.Color.NONE) {
+			// System.out.println("colokor is invalid");
 			return false;
 		}
-
+		// System.out.println("o123");
 		// true if move in the same colume
 		if (oldPos.getX() == newPos.getX() && Math.abs(oldPos.getY() - newPos.getY()) == 1 ) {
+			// System.out.println(?)
 			return true;
 		}
 

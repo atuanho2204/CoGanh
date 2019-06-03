@@ -27,14 +27,20 @@ public class Player {
 
 	// return false if the move is invalid, else return true
 	public boolean makeMove(Board board, int oldX, int oldY, int newX, int newY) {
+		// System.out.println("I'm here");
 		if (!(new Position(oldX, oldY)).isValid()) {
+			// System.out.println("oldX is invalid");
 			return false;
 		}
 		if (!(new Position(newX, newY)).isValid()) {
+			// System.out.println("newX is invalid");
 			return false;
 		}
 		// return false if the old piece does not belong to this player
 		if (board.getPiece(new Position(oldX, oldY)).getColor() != color) {
+			// System.out.println("color is invalid");
+			// System.out.println(board.getPiece(new Position(oldX, oldY)).getColor());
+			// System.out.println(color);
 			return false;
 		}
 
