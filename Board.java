@@ -50,4 +50,17 @@ public class Board {
 	public Piece getPiece(Position pos) {
 		return grid[pos.getX()][pos.getY()];
 	}	
+
+	public Piece[][] getBoard() {
+		return grid;
+	}
+
+	// return false if invalid, true if valid
+	public boolean makeMove(Move move) {
+		if (!move.isValid()) return false;
+
+		// change the board
+		return true;
+
+	}
 }

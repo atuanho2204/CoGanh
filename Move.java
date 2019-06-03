@@ -9,6 +9,14 @@ public class Move {
 		this.board = board;
 	}
 
+	public Position getOldPosition() {
+		return oldPos;
+	}
+
+	public Position getNewPosition() {
+		return newPos;
+	}
+
 	public boolean isValid() {
 		// false if invalid positions
 		if (!oldPos.isValid() || !newPos.isValid()) {
