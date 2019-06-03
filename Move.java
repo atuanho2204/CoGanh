@@ -39,10 +39,6 @@ public class Move {
 			}
 		}  
 
-
-
-
-
-		return true;
+		return false;
 	}
 }
