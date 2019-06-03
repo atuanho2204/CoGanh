@@ -39,12 +39,21 @@ public class Board {
 
 	// print the board
 	public void print() {
+		System.out.print("  ");
+		for (int i = 0; i < 5; i++) {
+			System.out.print(i + " ");
+		}
+		System.out.println("-- x");
+
 		for (int y = 0; y < NUM_COLS; y++) {
+			System.out.print(y + " ");
 			for (int x = 0; x < NUM_ROWS; x++) {
-				System.out.print(grid[x][y]);
+				System.out.print(grid[x][y] + " ");
 			}
 			System.out.println();
 		} 
+		System.out.println("|");
+		System.out.println("y");
 	} 
 	
 	public Piece getPiece(Position pos) {

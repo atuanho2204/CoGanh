@@ -23,7 +23,7 @@ public class Main {
 					break;
 				} else {
 					System.out.println("invalid move. Enter again");
-				}
+				} 
 
 			}
 			System.out.println();
