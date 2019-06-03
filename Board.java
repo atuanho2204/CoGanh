@@ -1,3 +1,6 @@
+import java.util.Queue;
+import java.util.LinkedList; 
+
 public class Board {
 	private Piece[][] grid = new Piece[5][5];
 	private final int NUM_ROWS = 5;
@@ -70,12 +73,94 @@ public class Board {
 		if (!move.isValid()) return false;
 		// change the board
 		swap(move.getOldPosition().getX(), move.getOldPosition().getY(), move.getNewPosition().getX(), move.getNewPosition().getY() );
+		int newX = move.getNewPosition().getX();
+		int newY = move.getNewPosition().getY(); 
+
+		// System.out.println(grid[newX - 1][newY].getColor()+"  "+getOppositeColor(grid[newX][newY]) + " " + grid[newX + 1][newY].getColor());
+		// System.out.println(newX +" " + newY); 
+
+		if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY].getColor() == getOppositeColor(grid[newX][newY])  ) {
+			
+			grid[newX - 1][newY].setColor(grid[newX][newY].getColor());
+			grid[newX + 1][newY].setColor(grid[newX][newY].getColor());
+		}
+		if (newY >= 1 && newY <= 3 && grid[newX][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+			grid[newX][newY - 1].setColor(grid[newX][newY].getColor());
+			grid[newX][newY + 1].setColor(grid[newX][newY].getColor());
+		}
+
+		boolean[][] canEatDiagonal = new boolean[5][5];
+		canEatDiagonal[1][1] = true;
+		canEatDiagonal[3][1] = true;
+		canEatDiagonal[2][2] = true;
+		canEatDiagonal[1][3] = true;
+		canEatDiagonal[3][3] = true;
+		if(canEatDiagonal[newX][newY]) {
+			if( grid[newX - 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+				grid[newX - 1][newY - 1].setColor(grid[newX][newY].getColor());
+				grid[newX + 1][newY + 1].setColor(grid[newX][newY].getColor());
+			}
+			if( grid[newX - 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+				grid[newX - 1][newY + 1].setColor(grid[newX][newY].getColor());
+				grid[newX + 1][newY - 1].setColor(grid[newX][newY].getColor());
+			}
+		}
+
+		// eat all pieces which cannot escape 
+		Piece.Color oppositeColor = getOppositeColor(grid[newX][newY]);
+		boolean[][] isAlive = new boolean[5][5];
+		Queue<Piece> queue = new LinkedList<>();
+
+		for(int x = 0; x < 5; x++)	{
+			for(int y = 0; y < 5; y++)	{
+
+				// only consider piece with opposite color
+				if (grid[x][y].getColor() == oppositeColor) {
+					for (int x1 = 0; x1 < 5; x1++) {
+						for (int y1 = 0; y1 < 5; y1++) {
+							Position oldPos = new Position(x, y);
+							Position newPos = new Position(x1, y1);
+
+							// check if oldPos can move to newPos
+							if ((new Move(this, oldPos, newPos)).isValid() && grid[x1][y1].getColor() == Piece.Color.NONE) {
+								// oldPos can move
+								isAlive[x][y] = true;
+								queue.add(grid[x][y]);
+
+								System.out.println(x + " " + y);
+							} 
+						}
+					}
+				}
+			}
+		}
+
+		// while queue.size > 0
+		// 	Piece top = queue.peek()
+		// 	queue.remove()
+
+		// 	top.x, top.y
+		// 	for all (x1,y1):
+		// 		if top can move to (x1, y1) and (x1, y1) is opposite color
+		// 			if (isAlive[x1][y1] == false) 
+		// 				isAlive[x1][y1] = true
+		// 				queue.add(grid[x1][y1])
+
+
+
 		return true;
-
-
-
 	}
 
+
+	private Piece.Color getOppositeColor(Piece p) {
+		if(p.getColor() == Piece.Color.BLACK)	{
+			return Piece.Color.WHITE;
+		}
+		if(p.getColor() == Piece.Color.WHITE)	{
+			return Piece.Color.BLACK;
+		}
+		return Piece.Color.NONE;
+	}
 	private void swap(int oldX, int oldY, int newX, int newY)	{
 		Piece temp = grid[oldX][oldY];
 		grid[oldX][oldY] = grid[newX][newY];
