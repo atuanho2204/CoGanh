@@ -58,9 +58,18 @@ public class Board {
 	// return false if invalid, true if valid
 	public boolean makeMove(Move move) {
 		if (!move.isValid()) return false;
-
 		// change the board
+			swap(move.getOldPosition().getX(), move.getOldPosition().getY(), move.getNewPosition().getX(), move.getNewPosition().getY() );
 		return true;
+
+
+
+	}
+
+	private void swap(int oldX, int oldY, int newX, int newY)	{
+		Piece temp = grid[oldX][oldY];
+		grid[oldX][oldY] = grid[newX][newY];
+		grid[newX][newY] = temp;
 
 	}
 }
