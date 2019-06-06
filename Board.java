@@ -5,9 +5,11 @@ public class Board {
 	private Piece[][] grid = new Piece[5][5];
 	private final int NUM_ROWS = 5;
 	private final int NUM_COLS = 5;
+	public int checkIfWin = 0;
 
 	public Board()	{
-		// first row: all White
+		
+		//first row: all White
 		for (int x = 0; x < 5; x++)	{
 			createPiece(x, 0 , Piece.Color.WHITE);
 		}
@@ -126,11 +128,34 @@ public class Board {
 								// oldPos can move
 								isAlive[x][y] = true;
 								queue.add(grid[x][y]);
-
-								System.out.println(x + " " + y);
-							} 
+							}
 						}
 					}
+				}
+			}
+		}
+		while (!queue.isEmpty())	{
+			Piece top = queue.peek();
+			queue.remove();
+
+			int topX = top.getPosition().getX();
+			int topY = top.getPosition().getY();
+			
+			for (int x1 = 0; x1 < 5; x1++) {
+				for (int y1 = 0; y1 < 5; y1++) {
+					Position oldPos = new Position(topX, topY);
+					Position newPos = new Position(x1, y1);
+
+					// check if oldPos is relate to newPos
+					if ((new Move(this, oldPos, newPos)).isValidForBlockedPieces() && grid[x1][y1].getColor() == oppositeColor ) {
+						// oldPos can move
+						if(isAlive[x1][y1] == false)	{
+
+							isAlive[x1][y1] = true;
+							queue.add(grid[x1][y1]);
+
+						}
+					} 
 				}
 			}
 		}
@@ -147,9 +172,31 @@ public class Board {
 		// 				queue.add(grid[x1][y1])
 
 
+		// kill blocked pieces 
+		for (int x2 = 0; x2 < 5; x2++)	{
+			for (int y2 = 0; y2 < 5; y2++)	{
+				if (isAlive[x2][y2] == false && grid[x2][y2].getColor() == oppositeColor)	{
+					grid[x2][y2].setColor(grid[newX][newY].getColor());
+				}
+			}
+		}
+		// check if someone win the game
+		int count = 0;
+		for (int x = 0; x < 5; x++)	{
+			for (int y = 0; y < 5; y++)	{
+				if (grid[x][y].getColor() == oppositeColor) {
+					count++;
+				}
+			}
+		}
+
+		if (count == 0)	{
+			checkIfWin = 1;
+		}
 
 		return true;
 	}
+
 
 
 	private Piece.Color getOppositeColor(Piece p) {
