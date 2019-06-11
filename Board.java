@@ -2,13 +2,25 @@ import java.util.Queue;
 import java.util.LinkedList; 
 
 public class Board {
-	private Piece[][] grid = new Piece[5][5];
+	private Piece[][] grid;
 	private final int NUM_ROWS = 5;
 	private final int NUM_COLS = 5;
 	public int checkIfWin = 0;
+	public int checkIfForceToEat = 0;
+	public static int forceNewX = 0;
+	public static int forceNewY = 0;
+	public static int forceOldX = 0;
+	public static int forceOldY = 0;
+	public static int getAnswer = 0;
+	public static int applyForceToEat = 0;
 
-	public Board()	{
-		
+
+	public Board() {
+		grid = new Piece[5][5];
+	}
+
+	public void setUpBoard()	{
+
 		//first row: all White
 		for (int x = 0; x < 5; x++)	{
 			createPiece(x, 0 , Piece.Color.WHITE);
@@ -38,7 +50,7 @@ public class Board {
 	}
 
 	// create a piece at (x, y) with color 
-	private void createPiece(int x, int y,  Piece.Color color)	{
+	public void createPiece(int x, int y,  Piece.Color color)	{
 		grid[x][y] = new Piece(new Position(x,y), color);
 	}
 
@@ -73,13 +85,27 @@ public class Board {
 	public boolean makeMove(Move move) {
 		// System.out.println("Hello");
 		if (!move.isValid()) return false;
+		int newX = move.getNewPosition().getX();
+		int newY = move.getNewPosition().getY();
+		int oldX = move.getOldPosition().getX();
+		int oldY = move.getOldPosition().getY();
+
+		// 
+		if (getAnswer == 1)	{
+			if (applyForceToEat == 1)	{
+				if (newX != forceNewX && newY != forceNewY )	{
+					System.out.println("You have to move to " + forceNewX + " " + forceNewY);
+					return false;
+				}
+				if (oldX != forceOldX && oldY != forceOldY)	{
+					System.out.println("You have to pick " + forceOldX + " " + forceOldY);
+					return false;
+				}
+			}
+		}
+
 		// change the board
 		swap(move.getOldPosition().getX(), move.getOldPosition().getY(), move.getNewPosition().getX(), move.getNewPosition().getY() );
-		int newX = move.getNewPosition().getX();
-		int newY = move.getNewPosition().getY(); 
-
-		// System.out.println(grid[newX - 1][newY].getColor()+"  "+getOppositeColor(grid[newX][newY]) + " " + grid[newX + 1][newY].getColor());
-		// System.out.println(newX +" " + newY); 
 
 		if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY].getColor() == getOppositeColor(grid[newX][newY])  ) {
 			
@@ -108,7 +134,31 @@ public class Board {
 			}
 		}
 
-		// eat all pieces which cannot escape 
+		killBlockedPieces(newX, newY);
+
+		checkIfWin(newX, newY);
+
+		return true;
+	}
+
+	private void checkIfWin(int newX, int newY)	{
+		// check if someone wins the game
+		int count = 0;
+
+		for (int x = 0; x < 5; x++)	{
+			for (int y = 0; y < 5; y++)	{
+				if (grid[x][y].getColor() == getOppositeColor(grid[newX][newY])) {
+					count++;
+				}
+			}
+		}
+
+		if (count == 0)	{
+			checkIfWin = 1;
+		}
+	}
+
+	private void killBlockedPieces(int newX, int newY)	{
 		Piece.Color oppositeColor = getOppositeColor(grid[newX][newY]);
 		boolean[][] isAlive = new boolean[5][5];
 		Queue<Piece> queue = new LinkedList<>();
@@ -134,6 +184,7 @@ public class Board {
 				}
 			}
 		}
+
 		while (!queue.isEmpty())	{
 			Piece top = queue.peek();
 			queue.remove();
@@ -147,7 +198,7 @@ public class Board {
 					Position newPos = new Position(x1, y1);
 
 					// check if oldPos is relate to newPos
-					if ((new Move(this, oldPos, newPos)).isValidForBlockedPieces() && grid[x1][y1].getColor() == oppositeColor ) {
+					if ((new Move(this, oldPos, newPos)).isConnected() && grid[x1][y1].getColor() == oppositeColor ) {
 						// oldPos can move
 						if(isAlive[x1][y1] == false)	{
 
@@ -180,24 +231,56 @@ public class Board {
 				}
 			}
 		}
-		// check if someone win the game
-		int count = 0;
-		for (int x = 0; x < 5; x++)	{
-			for (int y = 0; y < 5; y++)	{
-				if (grid[x][y].getColor() == oppositeColor) {
-					count++;
-				}
-			}
-		}
 
-		if (count == 0)	{
-			checkIfWin = 1;
-		}
-
-		return true;
+	}
+	public void forceToEatRule(int newX, int newY) 	{
+		forceNewX = newX;
+		forceNewY = newY;
 	}
 
 
+	public boolean checkOtherPieceIsConnected (int newX, int newY) {
+		boolean check = checkThreeSamePieces(newX, newY);
+		if (check) {
+			for (int x = newX - 1; x <= newX + 1; x++)	{
+				for (int y = newY - 1; y <= newY + 1; y++)	{
+					if (getOppositeColor(grid[x][y]) == grid[newX][newY].getColor())	{
+						forceOldX = x;
+						forceOldY = y;
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+		
+	public boolean checkThreeSamePieces (int newX, int newY)	{
+		
+		if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY].getColor() == grid[newX][newY].getColor() )	{
+			return true;
+		}
+
+		if (newY >= 1 && newY <= 3 && grid[newX][newY - 1].getColor() == grid[newX][newY].getColor() && grid[newX][newY + 1].getColor() == grid[newX][newY].getColor() )	{
+			return true;
+		}
+
+		boolean[][] canEatDiagonal = new boolean[5][5];
+		canEatDiagonal[1][1] = true;
+		canEatDiagonal[3][1] = true;
+		canEatDiagonal[2][2] = true;
+		canEatDiagonal[1][3] = true;
+		canEatDiagonal[3][3] = true;
+		if(canEatDiagonal[newX][newY]) {
+			if( grid[newX - 1][newY - 1].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY + 1].getColor() == grid[newX][newY].getColor()  ) {
+				return true;
+			}
+			if( grid[newX - 1][newY + 1].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY - 1].getColor() == grid[newX][newY].getColor()  ) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private Piece.Color getOppositeColor(Piece p) {
 		if(p.getColor() == Piece.Color.BLACK)	{
@@ -208,10 +291,35 @@ public class Board {
 		}
 		return Piece.Color.NONE;
 	}
+
 	private void swap(int oldX, int oldY, int newX, int newY)	{
 		Piece temp = grid[oldX][oldY];
 		grid[oldX][oldY] = grid[newX][newY];
 		grid[newX][newY] = temp;
 
+	}
+
+	public void makeBoardForTestGame(String[][] drawBoard)	{
+		for (int x = 0; x < 5; x++)	{
+			for (int y = 0; y < 5; y++)	{
+				if (drawBoard[x][y].equalsIgnoreCase("W")) {
+					createPiece(y, x, Piece.Color.WHITE);
+				}
+				if (drawBoard[x][y].equalsIgnoreCase("B")) {
+					createPiece(y, x, Piece.Color.BLACK);
+				}
+				if (drawBoard[x][y].equalsIgnoreCase("-")) {
+					createPiece(y, x, Piece.Color.NONE);
+				}
+			}
+		}
+	}
+
+	public String toString(boolean p)	{
+		if (p == true)	{
+			return "true";
+		} else {
+			return "false";
+		}
 	}
 }
