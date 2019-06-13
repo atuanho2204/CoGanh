@@ -14,7 +14,6 @@ public class Board {
 	public static int getAnswer = 0;
 	public static int applyForceToEat = 0;
 
-
 	public Board() {
 		grid = new Piece[5][5];
 	}
@@ -93,14 +92,20 @@ public class Board {
 		// 
 		if (getAnswer == 1)	{
 			if (applyForceToEat == 1)	{
+				Position forceOldPos = new Position(oldX,oldY);
+				Position forceNewPos = new Position(forceNewX,forceNewY);
+				if (! new Move(this, forceOldPos, forceNewPos).isConnected())	{
+					System.out.println("You have to pick right piece due to ForceToEatRule" );
+					return false;
+				}
 				if (newX != forceNewX && newY != forceNewY )	{
 					System.out.println("You have to move to " + forceNewX + " " + forceNewY);
 					return false;
 				}
-				if (oldX != forceOldX && oldY != forceOldY)	{
-					System.out.println("You have to pick " + forceOldX + " " + forceOldY);
-					return false;
-				}
+				// if (oldX != forceOldX && oldY != forceOldY)	{
+				// 	System.out.println("You have to pick " + forceOldX + " " + forceOldY);
+				// 	return false;
+				// }
 			}
 		}
 
@@ -242,11 +247,13 @@ public class Board {
 	public boolean checkOtherPieceIsConnected (int newX, int newY) {
 		boolean check = checkThreeSamePieces(newX, newY);
 		if (check) {
-			for (int x = newX - 1; x <= newX + 1; x++)	{
-				for (int y = newY - 1; y <= newY + 1; y++)	{
-					if (getOppositeColor(grid[x][y]) == grid[newX][newY].getColor())	{
-						forceOldX = x;
-						forceOldY = y;
+			for (int x1 = 0; x1 < 5; x1++) {
+				for (int y1 = 0; y1 < 5; y1++) {
+					Position oldPos = new Position(newX, newY);
+					Position newPos = new Position(x1, y1);
+
+					// check if oldPos is relate to newPos
+					if ((new Move(this, oldPos, newPos)).isConnected() && grid[newX][newY].getColor() == getOppositeColor(grid[x1][y1]))	{
 						return true;
 					}
 				}
