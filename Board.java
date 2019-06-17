@@ -82,7 +82,15 @@ public class Board {
 	}
 
 	// return false if invalid, true otherwise
-	public boolean makeMove(Move move); 
+	// overrided in inherited classes
+	public boolean makeMove(Move move);
+
+	// list all valid moves (without added rules)
+	protected ArrayList<Move> allValidMoves(Piece.Color color) {
+		// use the current grid to list all possible moves
+		// code here
+		// return an ArrayList
+	} 
 
 	// change the board after every valid move
 	public void changeBoard() {
@@ -122,46 +130,45 @@ public class Board {
 			}
 		}
 
-		// process after moving
-
 		killBlockedPieces(newX, newY);
-		checkIfWin(newX, newY); // comments? 
 	}
 
-	// return false if invalid, true if valid
-	public boolean makeMove(Move move) {
-		if (!move.isValid()) return false;
+	// only use the 3 conditions in this, then delete
 
-		int newX = move.getNewPosition().getX();
-		int newY = move.getNewPosition().getY();
-		int oldX = move.getOldPosition().getX();
-		int oldY = move.getOldPosition().getY();
+	// public boolean makeMove(Move move) {
+	// 	if (!move.isValid()) return false;
 
-		if (getAnswer == 1)	{
-			if (applyForceToEat == 1) {
-				Position forceOldPos = new Position(oldX,oldY);
-				Position forceNewPos = new Position(forceNewX,forceNewY);
-				if (!new Move(this, forceOldPos, forceNewPos).isConnected())	{
-					System.out.println("You have to pick right piece due to ForceToEatRule" );
-					return false;
-				}
-				if (newX != forceNewX && newY != forceNewY )	{
-					System.out.println("You have to move to " + forceNewX + " " + forceNewY);
-					return false;
-				}
-				// if (oldX != forceOldX && oldY != forceOldY)	{
-				// 	System.out.println("You have to pick " + forceOldX + " " + forceOldY);
-				// 	return false;
-				// }
-			}
-		}
+	// 	int newX = move.getNewPosition().getX();
+	// 	int newY = move.getNewPosition().getY();
+	// 	int oldX = move.getOldPosition().getX();
+	// 	int oldY = move.getOldPosition().getY();
+
+	// 	if (getAnswer == 1)	{
+	// 		if (applyForceToEat == 1) {
+	// 			Position forceOldPos = new Position(oldX,oldY);
+	// 			Position forceNewPos = new Position(forceNewX,forceNewY);
+	// 			if (!new Move(this, forceOldPos, forceNewPos).isConnected()){ ??? this condition
+	// 				System.out.println("You have to pick right piece due to ForceToEatRule" );
+	// 				return false;
+	// 			}
+	// 			if (newX != forceNewX && newY != forceNewY ) { ??> this condition
+	// 				System.out.println("You have to move to " + forceNewX + " " + forceNewY);
+	// 				return false;
+	// 			}
+	// 			// if (oldX != forceOldX && oldY != forceOldY) { ??? this condition
+	// 			// 	System.out.println("You have to pick " + forceOldX + " " + forceOldY);
+	// 			// 	return false;
+	// 			// }
+	// 		}
+	// 	}
 		
-		return true;
-	}
+	// 	return true;
+	// }
 
 	// return 0 if no one won
 	// return 1 if first player won
 	// return 2 if second player won
+	// code here
 	private int checkIfWin(int newX, int newY)	{
 		int count = 0;
 
@@ -244,56 +251,59 @@ public class Board {
 			}
 		}
 	}
-	public void forceToEatRule(int newX, int newY) 	{
-		forceNewX = newX;
-		forceNewY = newY;
-	}
+
+	// ---  unneccessary
+
+	// public void forceToEatRule(int newX, int newY) 	{
+	// 	forceNewX = newX;
+	// 	forceNewY = newY;
+	// }
 
 
-	public boolean checkOtherPieceIsConnected (int newX, int newY) {
-		boolean check = checkThreeSamePieces(newX, newY);
-		if (check) {
-			for (int x1 = 0; x1 < 5; x1++) {
-				for (int y1 = 0; y1 < 5; y1++) {
-					Position oldPos = new Position(newX, newY);
-					Position newPos = new Position(x1, y1);
+	// public boolean checkOtherPieceIsConnected (int newX, int newY) {
+	// 	boolean check = checkThreeSamePieces(newX, newY);
+	// 	if (check) {
+	// 		for (int x1 = 0; x1 < 5; x1++) {
+	// 			for (int y1 = 0; y1 < 5; y1++) {
+	// 				Position oldPos = new Position(newX, newY);
+	// 				Position newPos = new Position(x1, y1);
 
-					// check if oldPos is relate to newPos
-					if ((new Move(this, oldPos, newPos)).isConnected() && grid[newX][newY].getColor() == getOppositeColor(grid[x1][y1]))	{
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
+	// 				// check if oldPos is relate to newPos
+	// 				if ((new Move(this, oldPos, newPos)).isConnected() && grid[newX][newY].getColor() == getOppositeColor(grid[x1][y1]))	{
+	// 					return true;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 		
-	public boolean checkThreeSamePieces (int newX, int newY)	{
+	// public boolean checkThreeSamePieces (int newX, int newY)	{
 		
-		if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY].getColor() == grid[newX][newY].getColor() )	{
-			return true;
-		}
+	// 	if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY].getColor() == grid[newX][newY].getColor() )	{
+	// 		return true;
+	// 	}
 
-		if (newY >= 1 && newY <= 3 && grid[newX][newY - 1].getColor() == grid[newX][newY].getColor() && grid[newX][newY + 1].getColor() == grid[newX][newY].getColor() )	{
-			return true;
-		}
+	// 	if (newY >= 1 && newY <= 3 && grid[newX][newY - 1].getColor() == grid[newX][newY].getColor() && grid[newX][newY + 1].getColor() == grid[newX][newY].getColor() )	{
+	// 		return true;
+	// 	}
 
-		boolean[][] canEatDiagonal = new boolean[5][5];
-		canEatDiagonal[1][1] = true;
-		canEatDiagonal[3][1] = true;
-		canEatDiagonal[2][2] = true;
-		canEatDiagonal[1][3] = true;
-		canEatDiagonal[3][3] = true;
-		if(canEatDiagonal[newX][newY]) {
-			if( grid[newX - 1][newY - 1].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY + 1].getColor() == grid[newX][newY].getColor()  ) {
-				return true;
-			}
-			if( grid[newX - 1][newY + 1].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY - 1].getColor() == grid[newX][newY].getColor()  ) {
-				return true;
-			}
-		}
-		return false;
-	}
+	// 	boolean[][] canEatDiagonal = new boolean[5][5];
+	// 	canEatDiagonal[1][1] = true;
+	// 	canEatDiagonal[3][1] = true;
+	// 	canEatDiagonal[2][2] = true;
+	// 	canEatDiagonal[1][3] = true;
+	// 	canEatDiagonal[3][3] = true;
+	// 	if(canEatDiagonal[newX][newY]) {
+	// 		if( grid[newX - 1][newY - 1].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY + 1].getColor() == grid[newX][newY].getColor()  ) {
+	// 			return true;
+	// 		}
+	// 		if( grid[newX - 1][newY + 1].getColor() == grid[newX][newY].getColor() && grid[newX + 1][newY - 1].getColor() == grid[newX][newY].getColor()  ) {
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 
 	private Piece.Color getOppositeColor(Piece p) {
 		if(p.getColor() == Piece.Color.BLACK)	{
