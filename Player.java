@@ -7,8 +7,6 @@ public class Player {
 		this.color = color;
 	}
 
-	
-
 	public String getName() {
 		return name;
 	}
@@ -40,6 +38,7 @@ public class Player {
 			// System.out.println("newX is invalid");
 			return false;
 		}
+		
 		// return false if the old piece does not belong to this player
 		if (board.getPiece(new Position(oldX, oldY)).getColor() != color) {
 			// System.out.println("color is invalid");

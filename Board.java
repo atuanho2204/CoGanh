@@ -5,20 +5,21 @@ public class Board {
 	private Piece[][] grid;
 	private final int NUM_ROWS = 5;
 	private final int NUM_COLS = 5;
-	public int checkIfWin = 0;
-	public int checkIfForceToEat = 0;
-	public static int forceNewX = 0;
-	public static int forceNewY = 0;
-	public static int forceOldX = 0;
-	public static int forceOldY = 0;
-	public static int getAnswer = 0;
-	public static int applyForceToEat = 0;
+	private Move lastMove;
+	// public int checkIfWin = 0;
+	// public int checkIfForceToEat = 0;
+	// public static int forceNewX = 0;
+	// public static int forceNewY = 0;
+	// public static int forceOldX = 0;
+	// public static int forceOldY = 0;
+	// public static int getAnswer = 0;
+	// public static int applyForceToEat = 0;
 
 	public Board() {
 		grid = new Piece[5][5];
 	}
 
-	public void setUpBoard()	{
+	public void setUpBoard() {
 
 		//first row: all White
 		for (int x = 0; x < 5; x++)	{
@@ -80,21 +81,67 @@ public class Board {
 		return grid;
 	}
 
+	// return false if invalid, true otherwise
+	public boolean makeMove(Move move); 
+
+	// change the board after every valid move
+	public void changeBoard() {
+		swap(move.getOldPosition().getX(), move.getOldPosition().getY(), move.getNewPosition().getX(), move.getNewPosition().getY() );
+
+		// ---- eat column
+		if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY].getColor() == getOppositeColor(grid[newX][newY])  ) {
+			grid[newX - 1][newY].setColor(grid[newX][newY].getColor());
+			grid[newX + 1][newY].setColor(grid[newX][newY].getColor());
+		}
+
+		// ---- eat row
+		if (newY >= 1 && newY <= 3 && grid[newX][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+			grid[newX][newY - 1].setColor(grid[newX][newY].getColor());
+			grid[newX][newY + 1].setColor(grid[newX][newY].getColor());
+		}
+
+		// ---- eat diagonal
+
+		// five positions that can eat diagonal
+		boolean[][] canEatDiagonal = new boolean[5][5];
+		canEatDiagonal[1][1] = true; 
+		canEatDiagonal[3][1] = true;
+		canEatDiagonal[2][2] = true;
+		canEatDiagonal[1][3] = true;
+		canEatDiagonal[3][3] = true;
+
+		// check eatable
+		if(canEatDiagonal[newX][newY]) {
+			if(grid[newX - 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+				grid[newX - 1][newY - 1].setColor(grid[newX][newY].getColor());
+				grid[newX + 1][newY + 1].setColor(grid[newX][newY].getColor());
+			}
+			if(grid[newX - 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+				grid[newX - 1][newY + 1].setColor(grid[newX][newY].getColor());
+				grid[newX + 1][newY - 1].setColor(grid[newX][newY].getColor());
+			}
+		}
+
+		// process after moving
+
+		killBlockedPieces(newX, newY);
+		checkIfWin(newX, newY); // comments? 
+	}
+
 	// return false if invalid, true if valid
 	public boolean makeMove(Move move) {
-		// System.out.println("Hello");
 		if (!move.isValid()) return false;
+
 		int newX = move.getNewPosition().getX();
 		int newY = move.getNewPosition().getY();
 		int oldX = move.getOldPosition().getX();
 		int oldY = move.getOldPosition().getY();
 
-		// 
 		if (getAnswer == 1)	{
-			if (applyForceToEat == 1)	{
+			if (applyForceToEat == 1) {
 				Position forceOldPos = new Position(oldX,oldY);
 				Position forceNewPos = new Position(forceNewX,forceNewY);
-				if (! new Move(this, forceOldPos, forceNewPos).isConnected())	{
+				if (!new Move(this, forceOldPos, forceNewPos).isConnected())	{
 					System.out.println("You have to pick right piece due to ForceToEatRule" );
 					return false;
 				}
@@ -108,46 +155,14 @@ public class Board {
 				// }
 			}
 		}
-
-		// change the board
-		swap(move.getOldPosition().getX(), move.getOldPosition().getY(), move.getNewPosition().getX(), move.getNewPosition().getY() );
-
-		if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY].getColor() == getOppositeColor(grid[newX][newY])  ) {
-			
-			grid[newX - 1][newY].setColor(grid[newX][newY].getColor());
-			grid[newX + 1][newY].setColor(grid[newX][newY].getColor());
-		}
-		if (newY >= 1 && newY <= 3 && grid[newX][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
-			grid[newX][newY - 1].setColor(grid[newX][newY].getColor());
-			grid[newX][newY + 1].setColor(grid[newX][newY].getColor());
-		}
-
-		boolean[][] canEatDiagonal = new boolean[5][5];
-		canEatDiagonal[1][1] = true;
-		canEatDiagonal[3][1] = true;
-		canEatDiagonal[2][2] = true;
-		canEatDiagonal[1][3] = true;
-		canEatDiagonal[3][3] = true;
-		if(canEatDiagonal[newX][newY]) {
-			if( grid[newX - 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
-				grid[newX - 1][newY - 1].setColor(grid[newX][newY].getColor());
-				grid[newX + 1][newY + 1].setColor(grid[newX][newY].getColor());
-			}
-			if( grid[newX - 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
-				grid[newX - 1][newY + 1].setColor(grid[newX][newY].getColor());
-				grid[newX + 1][newY - 1].setColor(grid[newX][newY].getColor());
-			}
-		}
-
-		killBlockedPieces(newX, newY);
-
-		checkIfWin(newX, newY);
-
+		
 		return true;
 	}
 
-	private void checkIfWin(int newX, int newY)	{
-		// check if someone wins the game
+	// return 0 if no one won
+	// return 1 if first player won
+	// return 2 if second player won
+	private int checkIfWin(int newX, int newY)	{
 		int count = 0;
 
 		for (int x = 0; x < 5; x++)	{
@@ -168,6 +183,9 @@ public class Board {
 		boolean[][] isAlive = new boolean[5][5];
 		Queue<Piece> queue = new LinkedList<>();
 
+		// algorithm??? BFS
+
+		// find all open pieces
 		for(int x = 0; x < 5; x++)	{
 			for(int y = 0; y < 5; y++)	{
 
@@ -190,6 +208,7 @@ public class Board {
 			}
 		}
 
+		// find all alive pieces		
 		while (!queue.isEmpty())	{
 			Piece top = queue.peek();
 			queue.remove();
@@ -216,18 +235,6 @@ public class Board {
 			}
 		}
 
-		// while queue.size > 0
-		// 	Piece top = queue.peek()
-		// 	queue.remove()
-
-		// 	top.x, top.y
-		// 	for all (x1,y1):
-		// 		if top can move to (x1, y1) and (x1, y1) is opposite color
-		// 			if (isAlive[x1][y1] == false) 
-		// 				isAlive[x1][y1] = true
-		// 				queue.add(grid[x1][y1])
-
-
 		// kill blocked pieces 
 		for (int x2 = 0; x2 < 5; x2++)	{
 			for (int y2 = 0; y2 < 5; y2++)	{
@@ -236,7 +243,6 @@ public class Board {
 				}
 			}
 		}
-
 	}
 	public void forceToEatRule(int newX, int newY) 	{
 		forceNewX = newX;
