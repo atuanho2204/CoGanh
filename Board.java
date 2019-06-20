@@ -1,11 +1,19 @@
 import java.util.Queue;
 import java.util.LinkedList; 
+import java.util.ArrayList;
 
 public class Board {
 	private Piece[][] grid;
 	private final int NUM_ROWS = 5;
 	private final int NUM_COLS = 5;
 	private Move lastMove;
+	protected  Move move;
+	protected int newX = move.getNewPosition().getX();
+	protected int newY = move.getNewPosition().getY();
+	protected int oldX = move.getOldPosition().getX();
+	protected int oldY = move.getOldPosition().getY();
+
+
 	// public int checkIfWin = 0;
 	// public int checkIfForceToEat = 0;
 	// public static int forceNewX = 0;
@@ -83,55 +91,135 @@ public class Board {
 
 	// return false if invalid, true otherwise
 	// overrided in inherited classes
-	public boolean makeMove(Move move);
+	public boolean makeMove(Move move) {
+		return false;
+	}
 
 	// list all valid moves (without added rules)
 	protected ArrayList<Move> allValidMoves(Piece.Color color) {
 		// use the current grid to list all possible moves
 		// code here
+		ArrayList<Move> allValidMoves = new ArrayList<Move>();
+		// for all pieces with color;
+	
+		for (int x = 0; x < 5; x++) {
+			for (int y = 0; y < 5; y++) {
+				if (grid[x][y].getColor() == color) {
+					for (int newPosX = 0; newPosX < 5; newPosX++) {		// check all valid move;
+						for (int newPosY = 0; newPosY < 5; newPosY++) {
+							Position oldPos = new Position(x, y);
+							Position newPos = new Position(newPosX, newPosY);
+							Move validMove = new Move(this, oldPos, newPos);
+							if (validMove.isValid()) {
+								allValidMoves.add(validMove);
+							}
+						}
+					}
+				}	
+			}
+		}
+		
+		return allValidMoves;
 		// return an ArrayList
 	} 
 
 	// change the board after every valid move
 	public void changeBoard() {
+
 		swap(move.getOldPosition().getX(), move.getOldPosition().getY(), move.getNewPosition().getX(), move.getNewPosition().getY() );
 
 		// ---- eat column
-		if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY].getColor() == getOppositeColor(grid[newX][newY])  ) {
+		if (checkRowEatable()) {
 			grid[newX - 1][newY].setColor(grid[newX][newY].getColor());
 			grid[newX + 1][newY].setColor(grid[newX][newY].getColor());
 		}
 
 		// ---- eat row
-		if (newY >= 1 && newY <= 3 && grid[newX][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+		if (checkColumEatable()) {
 			grid[newX][newY - 1].setColor(grid[newX][newY].getColor());
 			grid[newX][newY + 1].setColor(grid[newX][newY].getColor());
 		}
 
 		// ---- eat diagonal
 
-		// five positions that can eat diagonal
-		boolean[][] canEatDiagonal = new boolean[5][5];
+		if (checkFirstDiagonal()) {
+			grid[newX - 1][newY - 1].setColor(grid[newX][newY].getColor());
+			grid[newX + 1][newY + 1].setColor(grid[newX][newY].getColor());
+		}
+		if (checkSecondDiagonal()) {
+			grid[newX - 1][newY + 1].setColor(grid[newX][newY].getColor());
+			grid[newX + 1][newY - 1].setColor(grid[newX][newY].getColor());
+		}
+		
+
+		killBlockedPieces(newX, newY);
+	}
+
+	public boolean checkRowEatable() {
+		if (newX >= 1 && newX <= 3 && grid[newX - 1][newY].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY].getColor() == getOppositeColor(grid[newX][newY]) ) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean checkColumEatable() {
+		if (newY >= 1 && newY <= 3 && grid[newX][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX][newY + 1].getColor() == getOppositeColor(grid[newX][newY]) )	{
+			return true;
+		}
+		return false;
+	}
+	private boolean[][] canEatDiagonal = new boolean[5][5];
+	private void setFivePosition() {
 		canEatDiagonal[1][1] = true; 
 		canEatDiagonal[3][1] = true;
 		canEatDiagonal[2][2] = true;
 		canEatDiagonal[1][3] = true;
 		canEatDiagonal[3][3] = true;
+	}
 
-		// check eatable
-		if(canEatDiagonal[newX][newY]) {
-			if(grid[newX - 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
-				grid[newX - 1][newY - 1].setColor(grid[newX][newY].getColor());
-				grid[newX + 1][newY + 1].setColor(grid[newX][newY].getColor());
-			}
-			if(grid[newX - 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
-				grid[newX - 1][newY + 1].setColor(grid[newX][newY].getColor());
-				grid[newX + 1][newY - 1].setColor(grid[newX][newY].getColor());
+	public boolean checkFirstDiagonal()	{
+		setFivePosition();
+		if (canEatDiagonal[newX][newY])	{
+			if (grid[newX - 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+				return true;
 			}
 		}
-
-		killBlockedPieces(newX, newY);
+		return false;
 	}
+
+	public boolean checkSecondDiagonal() {
+		setFivePosition();
+		if (canEatDiagonal[newX][newY]) {
+			if (grid[newX - 1][newY + 1].getColor() == getOppositeColor(grid[newX][newY]) && grid[newX + 1][newY - 1].getColor() == getOppositeColor(grid[newX][newY])  ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean checkDiagonalEatable() {
+		// check eatable
+		if (canEatDiagonal[newX][newY]) {
+			if (checkFirstDiagonal()) {
+				return true;
+			}
+			if (checkSecondDiagonal()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean eatable() {
+		if (checkRowEatable() || checkColumEatable() || checkDiagonalEatable())	{
+			return true;
+		}
+		return false;
+	}
+
+
+
+	
 
 	// only use the 3 conditions in this, then delete
 
@@ -170,19 +258,19 @@ public class Board {
 	// return 2 if second player won
 	// code here
 	private int checkIfWin(int newX, int newY)	{
-		int count = 0;
 
 		for (int x = 0; x < 5; x++)	{
 			for (int y = 0; y < 5; y++)	{
 				if (grid[x][y].getColor() == getOppositeColor(grid[newX][newY])) {
-					count++;
+					return 0;
+				} else if (grid[x][y].getColor() == Piece.Color.WHITE)	{
+					return 1;
+				} else if (grid[x][y].getColor() == Piece.Color.BLACK)	{
+					return 2;
 				}
 			}
 		}
-
-		if (count == 0)	{
-			checkIfWin = 1;
-		}
+		return -1;
 	}
 
 	private void killBlockedPieces(int newX, int newY)	{
